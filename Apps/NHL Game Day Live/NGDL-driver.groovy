@@ -37,12 +37,13 @@
  *
  *  Changes:
  * 
+ *  V1.0.2 - 01/22/21 - Added Broadcast and Game State Data.
  *  V1.0.1 - 08/02/20 - Minor adjustments
  *  V1.0.0 - 07/30/20 - Initial release.
  */
 
 metadata {
-	definition (name: "NHL Game Day Live Driver", namespace: "BPTWorld", author: "Bryan Turcotte", importUrl: "https://raw.githubusercontent.com/bptworld/Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-driver.groovy") {
+	definition (name: "NHL Game Day Live Driver", namespace: "BPTWorld", author: "Bryan Turcotte", importUrl: "https://raw.githubusercontent.com/CarlKaehler/bptworld-Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-driver.groovy") {
    		capability "Actuator"
 
         command "liveScoreboard", ["string"]
@@ -51,7 +52,9 @@ metadata {
         command "gameStatus2", ["string"]
         command "homeTeamData", ["string"]
         command "awayTeamData", ["string"]
-              
+        command "broadcastData", ["string"]
+        command "gameState", ["string"]
+
         attribute "bpt-liveScoreboard", "string"
         attribute "awayTeam", "string"
         attribute "homeTeam", "string"
@@ -68,7 +71,9 @@ metadata {
         attribute "homeScores", "string"
         attribute "awaySOG", "string"
         attribute "homeSOG", "string"
-               
+        attribute "channels", "string"
+        attribute "gameState", "string"
+
         attribute "bpt-gameSchedule", "string"
         attribute "gameScheduleCount", "number"
                 
@@ -114,10 +119,20 @@ def gameStatus2(data) {
 
 def homeTeamData(data) {
     if(logEnable) log.debug "In homeTeamData - Received new data!"
-    sendEvent(name: "homeTeamRecord", value: theData, isStateChange: true)
+    sendEvent(name: "homeTeamRecord", value: data, isStateChange: true)
 }
 
 def awayTeamData(data) {
     if(logEnable) log.debug "In awayTeamData - Received new data!"
-    sendEvent(name: "awayTeamRecord", value: theData, isStateChange: true)
+    sendEvent(name: "awayTeamRecord", value: data, isStateChange: true)
+}
+
+def broadcastData(data) {
+    if(logEnable) log.debug "In broadcastData - Received new data!"
+    sendEvent(name: "channels", value: data, isStateChange: true)
+}
+
+def gameState(data) {
+    if(logEnable) log.debug "In gameState - Received new data!"
+    sendEvent(name: "gameState", value: data)
 }

@@ -69,7 +69,7 @@ definition(
     iconUrl: "",
     iconX2Url: "",
     iconX3Url: "",
-	importUrl: "https://raw.githubusercontent.com/bptworld/Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-child.groovy",
+	importUrl: "https://raw.githubusercontent.com/CarlKaehler/bptworld-Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-child.groovy",
 )
 
 preferences {
@@ -459,8 +459,9 @@ def checkIfGameDay() {
         def isGameDay = false
         try {  // Today
             def todayDate = new Date().format('yyyy-MM-dd', location.timeZone)
-            // http://statsapi.web.nhl.com/api/v1/schedule?teamId=6&date=2020-07-30
-            def params = [uri: "${state.MLB_API_URL}/schedule?teamId=${state.Team.id}&date=${todayDate}"] 
+            // added the broadcast schedule so we can do something with this.
+            // http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.broadcasts&teamId=6&date=2020-07-30
+            def params = [uri: "${state.MLB_API_URL}/schedule?expand=schedule.broadcasts&teamId=${state.Team.id}&date=${todayDate}"] 
 
             def tDate = new Date().format('MM-dd-yyyy', location.timeZone)
             if(logEnable) log.debug "In checkIfGameDay - Determine if it's a game day for the ${settings.mlbTeam}, requesting game day schedule for ${tDate}"
@@ -498,6 +499,12 @@ def checkIfGameDayHandler(resp,gDate) {
                     state.awayTeam = game.teams.away.team.name
                     state.homeTeam = game.teams.home.team.name
 
+                    // concat our broadcast data
+                    state.broadcasts = ""
+                    for(broadcast in game.broadcasts) {
+                        state.broadcasts += broadcast.name + ";"
+                    }
+
                     if(dataDevice) {        // NEW - only in BPTWorld's Hubitat version!                                  
                         gameData = "${gDate};${game.teams.away.team.name};${game.teams.home.team.name}"
                         dataDevice.gameData(gameData)                   
@@ -522,6 +529,10 @@ def checkIfGameDayHandler(resp,gDate) {
                             state.myTeamIs = "home"
                         }
                 
+                        // NEW - Add Broadcast data to device
+                        dataDevice.broadcastData(state.broadcasts)
+                        dataDevice.gameState(game.status.detailedState)
+
                         checkLiveGameStats()
                         if(logEnable) log.debug "In checkIfGameDayHandler - Game Day - sending gameData and teamData to device - My Team is ${state.myTeamIs}"
                     }
@@ -713,6 +724,7 @@ def checkLiveGameStatsHandler(resp, data) {
                 dataDevice.liveScoreboard(scoreBoard)
                 gameStatus2 = "${currentPeriod};${timeRemaining};${state.totalAwayScore};${state.totalHomeScore};${awaySOG};${homeSOG}"
                 dataDevice.gameStatus2(gameStatus2)
+                dataDevice.gameState(result.gameData.status.detailedState)
                 if(logEnable) log.debug "In checkLiveGameStatsHandler - Data sent"
             }
 

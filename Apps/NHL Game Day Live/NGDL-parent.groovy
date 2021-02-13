@@ -54,7 +54,7 @@ definition(
     iconUrl: "",
     iconX2Url: "",
     iconX3Url: "",
-	importUrl: "https://raw.githubusercontent.com/bptworld/Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-parent.groovy"
+	importUrl: "https://raw.githubusercontent.com/CarlKaehler/bptworld-Hubitat/master/Apps/NHL%20Game%20Day%20Live/NGDL-parent.groovy"
     )
 
 preferences {
